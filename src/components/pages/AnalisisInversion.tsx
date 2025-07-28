@@ -3,6 +3,8 @@ import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
 import FileUpload from '../ui/FileUpload';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface AnalisisInversionProps {
   usuario: { nombre: string; cargo: string };
@@ -14,99 +16,68 @@ const AnalisisInversion: React.FC<AnalisisInversionProps> = ({ usuario }) => {
   const [archivosSubidos, setArchivosSubidos] = useState<any[]>([]);
 
   const camposFormulario = [
-    { nombre: 'codigo_proyecto', etiqueta: 'Código del Proyecto', tipo: 'text', requerido: true },
-    { nombre: 'nombre_proyecto', etiqueta: 'Nombre del Proyecto', tipo: 'text', requerido: true },
-    { nombre: 'institucion_ejecutora', etiqueta: 'Institución Ejecutora', tipo: 'text', requerido: true },
-    { nombre: 'monto_total', etiqueta: 'Monto Total (GTQ)', tipo: 'number', requerido: true },
-    { nombre: 'fecha_inicio', etiqueta: 'Fecha de Inicio', tipo: 'date', requerido: true },
-    { nombre: 'fecha_fin', etiqueta: 'Fecha de Finalización', tipo: 'date', requerido: true },
+    { nombre: 'codigo_proyecto', etiqueta: 'Código del Proyecto', tipo: 'text' as const, requerido: true },
+    { nombre: 'nombre_proyecto', etiqueta: 'Nombre del Proyecto', tipo: 'text' as const, requerido: true },
+    { nombre: 'institucion_ejecutora', etiqueta: 'Institución Ejecutora', tipo: 'text' as const, requerido: true },
+    { nombre: 'monto_total', etiqueta: 'Monto Total (GTQ)', tipo: 'number' as const, requerido: true },
+    { nombre: 'fecha_inicio', etiqueta: 'Fecha de Inicio', tipo: 'date' as const, requerido: true },
+    { nombre: 'fecha_fin', etiqueta: 'Fecha de Finalización', tipo: 'date' as const, requerido: true },
     { 
       nombre: 'categoria_inversion', 
       etiqueta: 'Categoría de Inversión', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Infraestructura', 'Educación', 'Salud', 'Desarrollo Social', 'Medio Ambiente'],
       requerido: true
     },
     { 
       nombre: 'tipo_analisis', 
       etiqueta: 'Tipo de Análisis', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Viabilidad', 'Factibilidad', 'Seguimiento', 'Evaluación'],
       requerido: true
     },
-    { nombre: 'region', etiqueta: 'Región', tipo: 'text', requerido: true }
+    { nombre: 'region', etiqueta: 'Región', tipo: 'text' as const, requerido: true }
   ];
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Incluir información de archivos subidos
-    const infoArchivos = archivosSubidos.length > 0 
-      ? `\n\nDOCUMENTOS DEL EXPEDIENTE:\n${archivosSubidos.map(archivo => `• ${archivo.nombre} - ${(archivo.tamaño / 1024).toFixed(1)} KB`).join('\n')}\n`
-      : '';
-    
-    const analisis = `
-ANÁLISIS DE EXPEDIENTE DE INVERSIÓN PÚBLICA
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-INFORMACIÓN GENERAL DEL PROYECTO
+      let archivos = '';
+      let referenciaArchivos = '';
+      if (archivosSubidos.length > 0) {
+        archivos = `\nDocumentos del expediente: ${archivosSubidos.map(a => a.nombre).join(', ')}`;
+        const textos = archivosSubidos
+          .filter(a => a.contenido)
+          .map(a => `Contenido de ${a.nombre}:\n${a.contenido.substring(0, 1000)}`)
+          .join('\n\n');
+        if (textos) {
+          referenciaArchivos = `\n\nReferencia de documentos subidos:\n${textos}`;
+        }
+      }
+      const prompt = `Redacta un análisis ${datos.tipo_analisis.toLowerCase()} de expediente de inversión pública para SEGEPLAN con la siguiente información:\n\nCódigo del proyecto: ${datos.codigo_proyecto}\nNombre del proyecto: ${datos.nombre_proyecto}\nInstitución ejecutora: ${datos.institucion_ejecutora}\nMonto total: Q. ${Number(datos.monto_total).toLocaleString('es-GT')}\nPeríodo de ejecución: ${datos.fecha_inicio} - ${datos.fecha_fin}\nCategoría: ${datos.categoria_inversion}\nRegión: ${datos.region}${archivos}${referenciaArchivos}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, SEGEPLAN. Usa un formato profesional y adecuado para un análisis de expediente oficial.`;
 
-Código del Proyecto: ${datos.codigo_proyecto}
-Nombre del Proyecto: ${datos.nombre_proyecto}
-Institución Ejecutora: ${datos.institucion_ejecutora}
-Monto Total: Q. ${Number(datos.monto_total).toLocaleString('es-GT')}
-Período de Ejecución: ${new Date(datos.fecha_inicio).toLocaleDateString('es-GT')} - ${new Date(datos.fecha_fin).toLocaleDateString('es-GT')}
-Categoría: ${datos.categoria_inversion}
-Región: ${datos.region}
-Tipo de Análisis: ${datos.tipo_analisis}
-${infoArchivos}
-
-RESUMEN EJECUTIVO:
-${datos.contenido_libre || 'Análisis del proyecto de inversión pública basado en la documentación proporcionada...'}
-
-${archivosSubidos.length > 0 && archivosSubidos[0].contenido ? 
-  `ANÁLISIS DOCUMENTAL:\nBasado en el análisis de los documentos subidos, se identifican los siguientes elementos clave:\n${archivosSubidos[0].contenido.substring(0, 400)}...\n` : ''}
-
-ANÁLISIS TÉCNICO:
-• Viabilidad técnica del proyecto
-• Recursos necesarios
-• Cronograma de ejecución
-• Riesgos identificados
-
-ANÁLISIS FINANCIERO:
-• Estructura de financiamiento
-• Fuentes de recursos
-• Flujo de caja proyectado
-• Análisis costo-beneficio
-
-ANÁLISIS SOCIAL:
-• Población beneficiaria
-• Impacto social esperado
-• Indicadores de desarrollo
-• Sostenibilidad del proyecto
-
-ANÁLISIS AMBIENTAL:
-• Evaluación de impacto ambiental
-• Medidas de mitigación
-• Cumplimiento normativo
-• Sostenibilidad ambiental
-
-RECOMENDACIONES:
-1. [Recomendación técnica]
-2. [Recomendación financiera]
-3. [Recomendación de implementación]
-
-DICTAMEN:
-[Dictamen técnico sobre la viabilidad del proyecto]
-
-Elaborado por: ${usuario.nombre}
-Cargo: ${usuario.cargo}
-SEGEPLAN
-
-Fecha de elaboración: ${new Date().toLocaleDateString('es-GT')}
-`;
-
-    setDocumento(analisis);
+      const agent = new Agent({
+        name: "AnalisisInversionIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar el análisis.');
+    } catch (err) {
+      setDocumento('Error al generar el análisis.');
+    }
     setCargando(false);
   };
 

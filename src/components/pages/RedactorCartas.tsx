@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface RedactorCartasProps {
   usuario: { nombre: string; cargo: string };
@@ -12,22 +14,22 @@ const RedactorCartas: React.FC<RedactorCartasProps> = ({ usuario }) => {
   const [cargando, setCargando] = useState(false);
 
   const camposFormulario = [
-    { nombre: 'destinatario', etiqueta: 'Destinatario', tipo: 'text', requerido: true },
-    { nombre: 'cargo_destinatario', etiqueta: 'Cargo', tipo: 'text', requerido: true },
-    { nombre: 'institucion', etiqueta: 'Institución', tipo: 'text', requerido: true },
-    { nombre: 'ciudad', etiqueta: 'Ciudad', tipo: 'text', requerido: true },
-    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text', requerido: true },
+    { nombre: 'destinatario', etiqueta: 'Destinatario', tipo: 'text' as const, requerido: true },
+    { nombre: 'cargo_destinatario', etiqueta: 'Cargo', tipo: 'text' as const, requerido: true },
+    { nombre: 'institucion', etiqueta: 'Institución', tipo: 'text' as const, requerido: true },
+    { nombre: 'ciudad', etiqueta: 'Ciudad', tipo: 'text' as const, requerido: true },
+    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text' as const, requerido: true },
     { 
       nombre: 'protocolo', 
       etiqueta: 'Nivel de Protocolo', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Estándar', 'Diplomático', 'Ceremonial'],
       requerido: true
     },
     { 
       nombre: 'tipo_carta', 
       etiqueta: 'Tipo de Carta', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Invitación', 'Agradecimiento', 'Felicitación', 'Condolencia', 'Presentación'],
       requerido: true
     }
@@ -35,35 +37,31 @@ const RedactorCartas: React.FC<RedactorCartasProps> = ({ usuario }) => {
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const carta = `
-${datos.ciudad}, ${new Date().toLocaleDateString('es-GT')}
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-${datos.destinatario}
-${datos.cargo_destinatario}
-${datos.institucion}
-${datos.ciudad}
+      const prompt = `Redacta una carta oficial siguiendo el protocolo institucional de SEGEPLAN con la siguiente información:\n\nDestinatario: ${datos.destinatario}\nCargo: ${datos.cargo_destinatario}\nInstitución: ${datos.institucion}\nCiudad: ${datos.ciudad}\nAsunto: ${datos.asunto}\nNivel de protocolo: ${datos.protocolo}\nTipo de carta: ${datos.tipo_carta}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, SEGEPLAN. Usa un formato profesional y adecuado para una carta oficial.`;
 
-Distinguido/a ${datos.destinatario}:
-
-Es un honor dirigirme a usted con el propósito de ${datos.asunto.toLowerCase()}.
-
-${datos.contenido_libre || `Contenido de la carta ${datos.tipo_carta.toLowerCase()} con protocolo ${datos.protocolo.toLowerCase()}...`}
-
-Aprovecho la oportunidad para expresarle mi más distinguida consideración y estima.
-
-Cordialmente,
-
-${usuario.nombre}
-${usuario.cargo}
-Secretaría de Planificación y Programación de la Presidencia
-SEGEPLAN
-
-Adjunto: Según corresponda
-`;
-
-    setDocumento(carta);
+      const agent = new Agent({
+        name: "RedactorCartasIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar la carta.');
+    } catch (err) {
+      setDocumento('Error al generar la carta.');
+    }
     setCargando(false);
   };
 

@@ -104,9 +104,9 @@ const FormularioDocumento: React.FC<FormularioDocumentoProps> = ({
         <div>
           <label className="block font-semibold text-gray-800 mb-3">
             Contenido Adicional
-            <span className="text-sm font-normal text-gray-600 ml-2">
+            {/* <span className="text-sm font-normal text-gray-600 ml-2">
               (Si subiste documentos, se analizarán automáticamente)
-            </span>
+            </span> */}
           </label>
           <textarea
             value={formData.contenido_libre || ''}

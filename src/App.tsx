@@ -16,6 +16,7 @@ import CursoIA from './components/pages/CursoIA';
 import NotFound from './components/pages/NotFound';
 import Perfil from './components/pages/Perfil';
 import Estadisticas from './components/pages/Estadisticas';
+import ScrollToTop from './components/layout/scrolltotop';
 
 function App() {
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
@@ -72,7 +73,8 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
-      <Header usuario={usuario} onCambiarSeccion={setSeccionActiva} />
+      <ScrollToTop seccionActiva={seccionActiva} />
+      <Header usuario={usuario} />
       <TopNavigation 
         seccionActiva={seccionActiva}
         onCambiarSeccion={setSeccionActiva}

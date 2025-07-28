@@ -3,6 +3,8 @@ import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
 import FileUpload from '../ui/FileUpload';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface ResumenExpedientesProps {
   usuario: { nombre: string; cargo: string };
@@ -14,85 +16,67 @@ const ResumenExpedientes: React.FC<ResumenExpedientesProps> = ({ usuario }) => {
   const [archivosSubidos, setArchivosSubidos] = useState<any[]>([]);
 
   const camposFormulario = [
-    { nombre: 'numero_expediente', etiqueta: 'Número de Expediente', tipo: 'text', requerido: true },
-    { nombre: 'titulo_expediente', etiqueta: 'Título del Expediente', tipo: 'text', requerido: true },
-    { nombre: 'fecha_inicio', etiqueta: 'Fecha de Inicio', tipo: 'date', requerido: true },
-    { nombre: 'responsable', etiqueta: 'Responsable', tipo: 'text', requerido: true },
-    { nombre: 'departamento', etiqueta: 'Departamento', tipo: 'text', requerido: true },
+    { nombre: 'numero_expediente', etiqueta: 'Número de Expediente', tipo: 'text' as const, requerido: true },
+    { nombre: 'titulo_expediente', etiqueta: 'Título del Expediente', tipo: 'text' as const, requerido: true },
+    { nombre: 'fecha_inicio', etiqueta: 'Fecha de Inicio', tipo: 'date' as const, requerido: true },
+    { nombre: 'responsable', etiqueta: 'Responsable', tipo: 'text' as const, requerido: true },
+    { nombre: 'departamento', etiqueta: 'Departamento', tipo: 'text' as const, requerido: true },
     { 
       nombre: 'estado_expediente', 
       etiqueta: 'Estado del Expediente', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['En Proceso', 'Completado', 'Suspendido', 'Archivado'],
       requerido: true
     },
     { 
       nombre: 'tipo_resumen', 
       etiqueta: 'Tipo de Resumen', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Ejecutivo', 'Técnico', 'Administrativo', 'Legal'],
       requerido: true
     },
-    { nombre: 'paginas_totales', etiqueta: 'Número Total de Páginas', tipo: 'number' }
+    { nombre: 'paginas_totales', etiqueta: 'Número Total de Páginas', tipo: 'number' as const }
   ];
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Incluir información de archivos subidos
-    const infoArchivos = archivosSubidos.length > 0 
-      ? `\n\nDOCUMENTOS ANALIZADOS:\n${archivosSubidos.map(archivo => `• ${archivo.nombre} (${(archivo.tamaño / 1024).toFixed(1)} KB)`).join('\n')}\n`
-      : '';
-    
-    const resumen = `
-RESUMEN ${datos.tipo_resumen.toUpperCase()} DE EXPEDIENTE
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-Expediente No.: ${datos.numero_expediente}
-Título: ${datos.titulo_expediente}
-Fecha de Inicio: ${new Date(datos.fecha_inicio).toLocaleDateString('es-GT')}
-Responsable: ${datos.responsable}
-Departamento: ${datos.departamento}
-Estado: ${datos.estado_expediente}
-Páginas Totales: ${datos.paginas_totales || 'N/A'}
-${infoArchivos}
+      let archivos = '';
+      let referenciaArchivos = '';
+      if (archivosSubidos.length > 0) {
+        archivos = `\nDocumentos analizados: ${archivosSubidos.map(a => a.nombre).join(', ')}`;
+        const textos = archivosSubidos
+          .filter(a => a.contenido)
+          .map(a => `Contenido de ${a.nombre}:\n${a.contenido.substring(0, 1000)}`)
+          .join('\n\n');
+        if (textos) {
+          referenciaArchivos = `\n\nReferencia de documentos subidos:\n${textos}`;
+        }
+      }
+      const prompt = `Redacta un resumen ${datos.tipo_resumen.toLowerCase()} de expediente para SEGEPLAN con la siguiente información:\n\nExpediente No.: ${datos.numero_expediente}\nTítulo: ${datos.titulo_expediente}\nFecha de inicio: ${datos.fecha_inicio}\nResponsable: ${datos.responsable}\nDepartamento: ${datos.departamento}\nEstado: ${datos.estado_expediente}\nPáginas totales: ${datos.paginas_totales || 'N/A'}${archivos}${referenciaArchivos}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, SEGEPLAN. Usa un formato profesional y adecuado para un resumen de expediente oficial.`;
 
-ANTECEDENTES:
-${datos.contenido_libre || 'Resumen de antecedentes y contexto del expediente basado en los documentos analizados...'}
-
-${archivosSubidos.length > 0 && archivosSubidos[0].contenido ? 
-  `ANÁLISIS DE CONTENIDO:\n${archivosSubidos[0].contenido.substring(0, 500)}...\n` : ''}
-
-DESARROLLO:
-[Descripción del desarrollo del expediente]
-
-SITUACIÓN ACTUAL:
-[Estado actual del expediente y avances]
-
-CONCLUSIONES:
-[Conclusiones principales del análisis]
-
-RECOMENDACIONES:
-1. [Recomendación 1]
-2. [Recomendación 2]
-3. [Recomendación 3]
-
-DOCUMENTOS ANEXOS:
-• [Documento 1]
-• [Documento 2]
-• [Documento 3]
-
-OBSERVACIONES:
-[Observaciones adicionales relevantes]
-
-Elaborado por: ${usuario.nombre}
-Cargo: ${usuario.cargo}
-SEGEPLAN
-
-Fecha de elaboración: ${new Date().toLocaleDateString('es-GT')}
-`;
-
-    setDocumento(resumen);
+      const agent = new Agent({
+        name: "ResumenExpedientesIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar el resumen.');
+    } catch (err) {
+      setDocumento('Error al generar el resumen.');
+    }
     setCargando(false);
   };
 

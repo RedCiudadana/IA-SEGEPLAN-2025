@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface GeneradorMemosProps {
   usuario: { nombre: string; cargo: string };
@@ -12,21 +14,21 @@ const GeneradorMemos: React.FC<GeneradorMemosProps> = ({ usuario }) => {
   const [cargando, setCargando] = useState(false);
 
   const camposFormulario = [
-    { nombre: 'destinatario', etiqueta: 'Para', tipo: 'text', requerido: true },
-    { nombre: 'cargo_destinatario', etiqueta: 'Cargo', tipo: 'text', requerido: true },
-    { nombre: 'departamento', etiqueta: 'Departamento', tipo: 'text', requerido: true },
-    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text', requerido: true },
+    { nombre: 'destinatario', etiqueta: 'Para', tipo: 'text' as const, requerido: true },
+    { nombre: 'cargo_destinatario', etiqueta: 'Cargo', tipo: 'text' as const, requerido: true },
+    { nombre: 'departamento', etiqueta: 'Departamento', tipo: 'text' as const, requerido: true },
+    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text' as const, requerido: true },
     { 
       nombre: 'prioridad', 
       etiqueta: 'Prioridad', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Normal', 'Alta', 'Urgente'],
       requerido: true
     },
     { 
       nombre: 'tipo_memo', 
       etiqueta: 'Tipo de Memo', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Informativo', 'Solicitud', 'Instrucciones', 'Recordatorio'],
       requerido: true
     }
@@ -34,36 +36,31 @@ const GeneradorMemos: React.FC<GeneradorMemosProps> = ({ usuario }) => {
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const memo = `
-MEMORANDO INTERNO
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-MEMO No. ${Math.floor(Math.random() * 1000)}-2025-SEGEPLAN
+      const prompt = `Redacta un memorando interno siguiendo los protocolos institucionales de SEGEPLAN con la siguiente información:\n\nPara: ${datos.destinatario}\nCargo: ${datos.cargo_destinatario}\nDepartamento: ${datos.departamento}\nAsunto: ${datos.asunto}\nPrioridad: ${datos.prioridad}\nTipo de memo: ${datos.tipo_memo}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, SEGEPLAN. Usa un formato profesional y adecuado para un memorando oficial.`;
 
-PARA: ${datos.destinatario}
-CARGO: ${datos.cargo_destinatario}
-DEPARTAMENTO: ${datos.departamento}
-
-DE: ${usuario.nombre}
-CARGO: ${usuario.cargo}
-
-FECHA: ${new Date().toLocaleDateString('es-GT')}
-ASUNTO: ${datos.asunto}
-PRIORIDAD: ${datos.prioridad}
-
-${datos.contenido_libre || `Contenido del memorando ${datos.tipo_memo.toLowerCase()} relacionado con: ${datos.asunto}`}
-
-Favor acusar recibo de este memorando.
-
-Atentamente,
-
-${usuario.nombre}
-${usuario.cargo}
-SEGEPLAN
-`;
-
-    setDocumento(memo);
+      const agent = new Agent({
+        name: "GeneradorMemosIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar el memorando.');
+    } catch (err) {
+      setDocumento('Error al generar el memorando.');
+    }
     setCargando(false);
   };
 

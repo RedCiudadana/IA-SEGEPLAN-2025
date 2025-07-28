@@ -3,6 +3,8 @@ import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
 import FileUpload from '../ui/FileUpload';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface AsistenteMinutasProps {
   usuario: { nombre: string; cargo: string };
@@ -14,72 +16,62 @@ const AsistenteMinutas: React.FC<AsistenteMinutasProps> = ({ usuario }) => {
   const [archivosSubidos, setArchivosSubidos] = useState<any[]>([]);
 
   const camposFormulario = [
-    { nombre: 'titulo_reunion', etiqueta: 'Título de la Reunión', tipo: 'text', requerido: true },
-    { nombre: 'fecha_reunion', etiqueta: 'Fecha de la Reunión', tipo: 'date', requerido: true },
-    { nombre: 'hora_inicio', etiqueta: 'Hora de Inicio', tipo: 'time', requerido: true },
-    { nombre: 'hora_fin', etiqueta: 'Hora de Finalización', tipo: 'time' },
-    { nombre: 'lugar', etiqueta: 'Lugar', tipo: 'text', requerido: true },
-    { nombre: 'moderador', etiqueta: 'Moderador', tipo: 'text', requerido: true },
+    { nombre: 'titulo_reunion', etiqueta: 'Título de la Reunión', tipo: 'text' as const, requerido: true },
+    { nombre: 'fecha_reunion', etiqueta: 'Fecha de la Reunión', tipo: 'date' as const, requerido: true },
+    { nombre: 'hora_inicio', etiqueta: 'Hora de Inicio', tipo: 'time' as const, requerido: true },
+    { nombre: 'hora_fin', etiqueta: 'Hora de Finalización', tipo: 'time' as const },
+    { nombre: 'lugar', etiqueta: 'Lugar', tipo: 'text' as const, requerido: true },
+    { nombre: 'moderador', etiqueta: 'Moderador', tipo: 'text' as const, requerido: true },
     { 
       nombre: 'tipo_documento', 
       etiqueta: 'Tipo de Documento', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Minuta', 'Acta', 'Memoria de Reunión'],
       requerido: true
     },
-    { nombre: 'participantes', etiqueta: 'Participantes (separados por coma)', tipo: 'textarea', requerido: true }
+    { nombre: 'participantes', etiqueta: 'Participantes (separados por coma)', tipo: 'textarea' as const, requerido: true }
   ];
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const participantesLista = datos.participantes.split(',').map((p: string) => p.trim());
-    
-    // Incluir información de archivos subidos
-    const infoArchivos = archivosSubidos.length > 0 
-      ? `\n\nDOCUMENTOS DE REFERENCIA:\n${archivosSubidos.map(archivo => `• ${archivo.nombre}`).join('\n')}\n`
-      : '';
-    
-    const minuta = `
-${datos.tipo_documento.toUpperCase()} DE REUNIÓN
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-Título: ${datos.titulo_reunion}
-Fecha: ${new Date(datos.fecha_reunion).toLocaleDateString('es-GT')}
-Hora: ${datos.hora_inicio} - ${datos.hora_fin || 'Por definir'}
-Lugar: ${datos.lugar}
-Moderador: ${datos.moderador}
+      const participantesLista = datos.participantes.split(',').map((p: string) => p.trim());
+      let archivos = '';
+      let referenciaArchivos = '';
+      if (archivosSubidos.length > 0) {
+        archivos = `\nDocumentos de referencia: ${archivosSubidos.map(a => a.nombre).join(', ')}`;
+        const textos = archivosSubidos
+          .filter(a => a.contenido)
+          .map(a => `Contenido de ${a.nombre}:\n${a.contenido.substring(0, 1000)}`)
+          .join('\n\n');
+        if (textos) {
+          referenciaArchivos = `\n\nReferencia de documentos subidos:\n${textos}`;
+        }
+      }
+      const prompt = `Redacta una ${datos.tipo_documento.toLowerCase()} institucional de SEGEPLAN con la siguiente información:\n\nTítulo: ${datos.titulo_reunion}\nFecha: ${datos.fecha_reunion}\nHora: ${datos.hora_inicio} - ${datos.hora_fin || 'Por definir'}\nLugar: ${datos.lugar}\nModerador: ${datos.moderador}\nParticipantes: ${participantesLista.join(', ')}${archivos}${referenciaArchivos}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, SEGEPLAN. Usa un formato profesional y adecuado para una minuta/acta oficial.`;
 
-PARTICIPANTES:
-${participantesLista.map((p: string) => `• ${p}`).join('\n')}
-${infoArchivos}
-
-AGENDA:
-${datos.contenido_libre || 'Puntos de agenda desarrollados en la reunión...'}
-
-${archivosSubidos.length > 0 && archivosSubidos[0].contenido ? 
-  `DOCUMENTOS REVISADOS:\nSe revisaron los siguientes documentos durante la reunión:\n${archivosSubidos.map(archivo => `• ${archivo.nombre}`).join('\n')}\n` : ''}
-
-ACUERDOS Y COMPROMISOS:
-1. [Acuerdo 1]
-2. [Acuerdo 2]
-3. [Acuerdo 3]
-
-PRÓXIMOS PASOS:
-• [Acción 1] - Responsable: [Nombre] - Fecha límite: [Fecha]
-• [Acción 2] - Responsable: [Nombre] - Fecha límite: [Fecha]
-
-OBSERVACIONES:
-[Observaciones adicionales]
-
-Elaborado por: ${usuario.nombre}
-Cargo: ${usuario.cargo}
-SEGEPLAN
-
-Fecha de elaboración: ${new Date().toLocaleDateString('es-GT')}
-`;
-
-    setDocumento(minuta);
+      const agent = new Agent({
+        name: "AsistenteMinutasIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar la minuta/acta.');
+    } catch (err) {
+      setDocumento('Error al generar la minuta/acta.');
+    }
     setCargando(false);
   };
 

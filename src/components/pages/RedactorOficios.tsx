@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import FormularioDocumento from '../ui/FormularioDocumento';
 import EditorResultado from '../ui/EditorResultado';
 import PanelRecursos from '../ui/PanelRecursos';
+import { Agent, run, setDefaultOpenAIClient } from "@openai/agents";
+import OpenAI from "openai";
 
 interface RedactorOficiosProps {
   usuario: { nombre: string; cargo: string };
@@ -12,21 +14,21 @@ const RedactorOficios: React.FC<RedactorOficiosProps> = ({ usuario }) => {
   const [cargando, setCargando] = useState(false);
 
   const camposFormulario = [
-    { nombre: 'destinatario', etiqueta: 'Destinatario', tipo: 'text', requerido: true },
-    { nombre: 'cargo_destinatario', etiqueta: 'Cargo del Destinatario', tipo: 'text', requerido: true },
-    { nombre: 'institucion', etiqueta: 'Institución', tipo: 'text', requerido: true },
-    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text', requerido: true },
+    { nombre: 'destinatario', etiqueta: 'Destinatario', tipo: 'text' as const, requerido: true },
+    { nombre: 'cargo_destinatario', etiqueta: 'Cargo del Destinatario', tipo: 'text' as const, requerido: true },
+    { nombre: 'institucion', etiqueta: 'Institución', tipo: 'text' as const, requerido: true },
+    { nombre: 'asunto', etiqueta: 'Asunto', tipo: 'text' as const, requerido: true },
     { 
       nombre: 'tipo_lenguaje', 
       etiqueta: 'Tipo de Lenguaje', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Formal', 'Muy Formal', 'Protocolar'],
       requerido: true
     },
     { 
       nombre: 'urgencia', 
       etiqueta: 'Nivel de Urgencia', 
-      tipo: 'select', 
+      tipo: 'select' as const, 
       opciones: ['Normal', 'Urgente', 'Muy Urgente'],
       requerido: true
     }
@@ -34,36 +36,35 @@ const RedactorOficios: React.FC<RedactorOficiosProps> = ({ usuario }) => {
 
   const manejarGeneracion = async (datos: any) => {
     setCargando(true);
-    // Simulación de generación con IA
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const oficio = `
-OFICIO No. ${Math.floor(Math.random() * 1000)}-2025-SEGEPLAN
+    try {
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      if (!apiKey) {
+        setDocumento('Error: No está definida la variable VITE_OPENAI_API_KEY');
+        setCargando(false);
+        return;
+      }
+      const client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      setDefaultOpenAIClient(client);
 
-${datos.institucion}
-${datos.destinatario}
-${datos.cargo_destinatario}
+      const prompt = `Redacta un oficio institucional siguiendo los protocolos de SEGEPLAN con la siguiente información:
+      \n\nDestinatario: ${datos.destinatario}\nCargo del destinatario: ${datos.cargo_destinatario}
+      \nInstitución: ${datos.institucion}\nAsunto: ${datos.asunto}\nTipo de lenguaje: ${datos.tipo_lenguaje}
+      \nNivel de urgencia: ${datos.urgencia}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, 
+      SEGEPLAN. Usa un formato profesional y adecuado para un oficio oficial.`;
 
-Asunto: ${datos.asunto}
-
-Estimado/a ${datos.destinatario},
-
-Por medio del presente oficio, me dirijo a usted de manera ${datos.tipo_lenguaje.toLowerCase()} para hacer de su conocimiento lo siguiente:
-
-${datos.contenido_libre || 'Contenido del oficio basado en el asunto proporcionado...'}
-
-Aprovecho la oportunidad para reiterarle las muestras de mi más alta consideración y estima.
-
-Atentamente,
-
-${usuario.nombre}
-${usuario.cargo}
-SEGEPLAN
-
-c.c. Archivo
-`;
-
-    setDocumento(oficio);
+      const agent = new Agent({
+        name: "RedactorOficiosIA",
+        model: "gpt-4o-mini",
+        instructions: prompt
+      });
+      const result = await run(agent, "");
+      setDocumento(result.finalOutput ?? 'No se pudo generar el oficio.');
+    } catch (err) {
+      setDocumento('Error al generar el oficio.');
+    }
     setCargando(false);
   };
 

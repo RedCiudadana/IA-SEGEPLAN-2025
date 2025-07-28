@@ -7,7 +7,6 @@ import {
   BookOpen, 
   FolderOpen,
   Zap,
-  CheckCircle,
   Users,
   Award,
   ArrowRight,
@@ -16,9 +15,6 @@ import {
   Shield,
   Target
 } from 'lucide-react';
-import { Agent, run, tool, setDefaultOpenAIKey, setDefaultOpenAIClient } from "@openai/agents";
-import { z } from "zod";
-import OpenAI from "openai";
 
 interface DashboardProps {
   usuario: { nombre: string; cargo: string };
@@ -110,35 +106,6 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
     }
   ];
 
-  const [haiku, setHaiku] = useState<string>("");
-
-  useEffect(() => {
-    async function main() {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey) {
-        console.error("No está definida la variable VITE_OPENAI_API_KEY");
-        return;
-      }
-
-      const client = new OpenAI({
-        apiKey,
-        dangerouslyAllowBrowser: true
-      });
-      setDefaultOpenAIClient(client); // conecta el cliente al agente
-
-      const agent = new Agent({
-        name: "HaikuBotMini",
-        model: "gpt-4o-mini",
-        instructions: "You are a poetic assistant. Write a haiku about recursion in programming.",
-      });
-
-      const result = await run(agent, "");
-      setHaiku(result.finalOutput ?? "");
-    }
-
-    main().catch(console.error);
-  }, []);
-
   return (
     <div className="space-y-12">
       {/* Welcome Section - Redesigned */}
@@ -187,14 +154,6 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
           </div>
         </div>
       </section>
-      
-      {/* Haiku generado por el agente */}
-      {haiku && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
-          <h2 className="text-lg font-semibold text-blue-700 mb-2">Haiku generado por IA:</h2>
-          <pre className="text-blue-900 whitespace-pre-wrap">{haiku}</pre>
-        </div>
-      )}
 
       {/* Agents Section - Enhanced */}
       <section>
