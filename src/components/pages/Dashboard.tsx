@@ -155,70 +155,6 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
         </div>
       </section>
 
-      {/* Agents Section - Enhanced */}
-      <section>
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Selecciona tu Agente Especializado
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Cada agente está diseñado para un tipo específico de documento institucional, 
-            garantizando resultados profesionales y conformes a la normativa.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {agentes.map((agente) => {
-            const IconoComponente = agente.icono;
-            
-            return (
-              <div
-                key={agente.id}
-                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1 overflow-hidden"
-              >
-                {/* Header with gradient */}
-                <div className={`h-3 bg-gradient-to-r ${agente.color}`}></div>
-                
-                <div className="p-8">
-                  {/* Icon and Category */}
-                  <div className="flex items-start justify-between mb-6">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${agente.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <IconoComponente size={28} className="text-white" />
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full mb-1">
-                        {agente.categoria}
-                      </span>
-                      <div className="flex items-center text-gray-500 text-sm">
-                        <Clock size={14} className="mr-1" />
-                        {agente.tiempo}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Title and Description */}
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
-                    {agente.titulo}
-                  </h3>
-                  
-                  <p className="text-gray-600 mb-8 leading-relaxed text-base">
-                    {agente.descripcion}
-                  </p>
-                  
-                  {/* Action Button */}
-                  <button
-                    onClick={() => onSeleccionarAgente(agente.id)}
-                    className={`w-full bg-gradient-to-r ${agente.color} hover:shadow-xl text-white px-6 py-4 rounded-2xl transition-all duration-300 font-semibold text-lg shadow-lg transform group-hover:scale-105 flex items-center justify-center space-x-2`}
-                  >
-                    <span>Comenzar</span>
-                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* Features Section - New */}
       <section className="bg-gradient-to-br from-gray-50 to-white rounded-3xl p-12 border border-gray-100">
@@ -305,6 +241,71 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
               </p>
             </div>
           </div>
+        </div>
+      </section>
+      
+      {/* Agents Section - Enhanced */}
+      <section>
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Selecciona tu Agente Especializado
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Cada agente está diseñado para un tipo específico de documento institucional, 
+            garantizando resultados profesionales y conformes a la normativa.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12">
+          {agentes.map((agente) => {
+            const IconoComponente = agente.icono;
+            
+            return (
+              <div
+                key={agente.id}
+                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1 overflow-hidden"
+              >
+                {/* Header with gradient */}
+                <div className={`h-3 bg-gradient-to-r ${agente.color}`}></div>
+                
+                <div className="p-8">
+                  {/* Icon and Category */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${agente.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <IconoComponente size={28} className="text-white" />
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full mb-1">
+                        {agente.categoria}
+                      </span>
+                      <div className="flex items-center text-gray-500 text-sm">
+                        <Clock size={14} className="mr-1" />
+                        {agente.tiempo}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Title and Description */}
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                    {agente.titulo}
+                  </h3>
+                  
+                  <p className="text-gray-600 mb-8 leading-relaxed text-base">
+                    {agente.descripcion}
+                  </p>
+                  
+                  {/* Action Button */}
+                  <button
+                    onClick={() => onSeleccionarAgente(agente.id)}
+                    className={`w-full bg-gradient-to-r ${agente.color} hover:shadow-xl text-white px-6 py-4 rounded-2xl transition-all duration-300 font-semibold text-lg shadow-lg transform group-hover:scale-105 flex items-center justify-center space-x-2`}
+                  >
+                    <span>Comenzar</span>
+                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
     </div>

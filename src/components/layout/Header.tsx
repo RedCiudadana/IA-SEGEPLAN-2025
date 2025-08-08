@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { HelpCircle, User, Sparkles, Bell, Settings, Facebook, Twitter, Instagram, Youtube, Mail, Phone, LogOut } from 'lucide-react';
 import ModalAyuda from '../ui/ModalAyuda';
+import LogoSegeplan from '../../assets/logo-segeplan.png';
+import LogoRedCiudadana from '../../assets/redciudadana-logo.png';
 
 interface HeaderProps {
   usuario: { nombre: string; cargo: string };
@@ -76,7 +78,7 @@ const Header: React.FC<HeaderProps> = ({ usuario }) => {
               <div className="flex items-center space-x-8">
                 <div className="flex items-center space-x-3">
                   <img
-                    src="https://datos.segeplan.gob.gt/uploads/admin/2024-06-04-213946.470432PAGINA-DATOS-ABIERTOS-13.png"
+                    src={LogoSegeplan}
                     alt="SEGEPLAN"
                     className="h-16 w-auto object-contain"
                   />
@@ -86,7 +88,7 @@ const Header: React.FC<HeaderProps> = ({ usuario }) => {
                 
                 <div className="flex items-center space-x-3">
                   <img
-                    src="https://datos.segeplan.gob.gt/img/redciudadana-logo.png"
+                    src={LogoRedCiudadana}
                     alt="Red Ciudadana"
                     className="h-12 w-auto object-contain"
                   />
