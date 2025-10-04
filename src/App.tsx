@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './components/pages/Login';
 import Header from './components/layout/Header';
 import TopNavigation from './components/layout/TopNavigation';
@@ -19,25 +20,34 @@ import Estadisticas from './components/pages/Estadisticas';
 import Documentacion from './components/pages/Documentacion';
 import ScrollToTop from './components/layout/scrolltotop';
 
-function App() {
-  const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
+function AppContent() {
+  const { user, perfil, loading, signOut } = useAuth();
   const [seccionActiva, setSeccionActiva] = useState('inicio');
-  const [usuario] = useState({ nombre: 'Julio', cargo: 'Analista SEGEPLAN' });
 
-  const manejarLogin = (datosUsuario: { nombre: string; cargo: string }) => {
-    setUsuarioAutenticado(true);
-    // Aquí podrías actualizar los datos del usuario si es necesario
-  };
-
-  const manejarCerrarSesion = () => {
-    setUsuarioAutenticado(false);
+  const manejarCerrarSesion = async () => {
+    await signOut();
     setSeccionActiva('inicio');
   };
 
-  // Si no está autenticado, mostrar login
-  if (!usuarioAutenticado) {
-    return <Login onLogin={manejarLogin} />;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Cargando...</p>
+        </div>
+      </div>
+    );
   }
+
+  if (!user || !perfil) {
+    return <Login />;
+  }
+
+  const usuario = {
+    nombre: perfil.nombre,
+    cargo: perfil.cargo
+  };
 
   const renderSeccionActiva = () => {
     switch (seccionActiva) {
@@ -78,19 +88,27 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
       <ScrollToTop seccionActiva={seccionActiva} />
       <Header usuario={usuario} />
-      <TopNavigation 
+      <TopNavigation
         seccionActiva={seccionActiva}
         onCambiarSeccion={setSeccionActiva}
       />
-      
+
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {renderSeccionActiva()}
         </div>
       </main>
-      
+
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
