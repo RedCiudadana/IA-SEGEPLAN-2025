@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import { 
   User, 
   Settings, 
@@ -47,16 +49,76 @@ const Perfil: React.FC<PerfilProps> = ({ usuario, onCerrarSesion }) => {
     }
   });
 
+  const { perfil, updatePerfil } = useAuth();
   const [perfilData, setPerfilData] = useState({
     nombre: usuario.nombre,
     cargo: usuario.cargo,
-    email: 'julio.garcia@segeplan.gob.gt',
-    telefono: '+502 2230-0000',
-    departamento: 'Análisis y Planificación',
-    ubicacion: 'Guatemala, Guatemala',
-    fechaIngreso: '2023-03-15',
-    biografia: 'Analista especializado en planificación estratégica y desarrollo de políticas públicas.'
+    email: perfil?.email || '',
+    telefono: perfil?.telefono || '',
+    departamento: perfil?.departamento || '',
+    ubicacion: perfil?.ubicacion || '',
+    fechaIngreso: perfil?.fecha_ingreso || '',
+    biografia: perfil?.biografia || ''
   });
+  const [configuracionData, setConfiguracionData] = useState<any>(null);
+  const [cargandoConfig, setCargandoConfig] = useState(true);
+
+  useEffect(() => {
+    if (perfil) {
+      setPerfilData({
+        nombre: perfil.nombre,
+        cargo: perfil.cargo,
+        email: perfil.email,
+        telefono: perfil.telefono || '',
+        departamento: perfil.departamento || '',
+        ubicacion: perfil.ubicacion || '',
+        fechaIngreso: perfil.fecha_ingreso || '',
+        biografia: perfil.biografia || ''
+      });
+    }
+    cargarConfiguracion();
+  }, [perfil]);
+
+  const cargarConfiguracion = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('configuracion_usuario')
+        .select('*')
+        .eq('usuario_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setConfiguracion({
+          notificaciones: {
+            email: data.notificaciones_email,
+            push: data.notificaciones_push,
+            documentos: data.notificaciones_documentos,
+            actualizaciones: data.notificaciones_actualizaciones
+          },
+          privacidad: {
+            perfilPublico: data.perfil_publico,
+            mostrarActividad: data.mostrar_actividad,
+            compartirEstadisticas: data.compartir_estadisticas
+          },
+          apariencia: {
+            tema: data.tema,
+            idioma: data.idioma,
+            tamanoFuente: data.tamano_fuente
+          }
+        });
+        setConfiguracionData(data);
+      }
+    } catch (error) {
+      console.error('Error al cargar configuración:', error);
+    } finally {
+      setCargandoConfig(false);
+    }
+  };
 
   const secciones = [
     { id: 'perfil', titulo: 'Mi Perfil', icono: User },
@@ -67,7 +129,7 @@ const Perfil: React.FC<PerfilProps> = ({ usuario, onCerrarSesion }) => {
     { id: 'seguridad', titulo: 'Seguridad', icono: Key }
   ];
 
-  const manejarCambioConfiguracion = (seccion: string, campo: string, valor: any) => {
+  const manejarCambioConfiguracion = async (seccion: string, campo: string, valor: any) => {
     setConfiguracion(prev => ({
       ...prev,
       [seccion]: {
@@ -75,6 +137,41 @@ const Perfil: React.FC<PerfilProps> = ({ usuario, onCerrarSesion }) => {
         [campo]: valor
       }
     }));
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const campoDb = {
+        notificaciones: {
+          email: 'notificaciones_email',
+          push: 'notificaciones_push',
+          documentos: 'notificaciones_documentos',
+          actualizaciones: 'notificaciones_actualizaciones'
+        },
+        privacidad: {
+          perfilPublico: 'perfil_publico',
+          mostrarActividad: 'mostrar_actividad',
+          compartirEstadisticas: 'compartir_estadisticas'
+        },
+        apariencia: {
+          tema: 'tema',
+          idioma: 'idioma',
+          tamanoFuente: 'tamano_fuente'
+        }
+      };
+
+      const nombreCampoDb = (campoDb as any)[seccion][campo];
+
+      const { error } = await supabase
+        .from('configuracion_usuario')
+        .update({ [nombreCampoDb]: valor })
+        .eq('usuario_id', user.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error al actualizar configuración:', error);
+    }
   };
 
   const manejarCambioPerfil = (campo: string, valor: string) => {
@@ -84,9 +181,25 @@ const Perfil: React.FC<PerfilProps> = ({ usuario, onCerrarSesion }) => {
     }));
   };
 
-  const guardarCambios = () => {
-    alert('Cambios guardados exitosamente');
-    setEditandoPerfil(false);
+  const guardarCambios = async () => {
+    try {
+      const { error } = await updatePerfil({
+        nombre: perfilData.nombre,
+        cargo: perfilData.cargo,
+        telefono: perfilData.telefono,
+        departamento: perfilData.departamento,
+        ubicacion: perfilData.ubicacion,
+        biografia: perfilData.biografia
+      });
+
+      if (error) throw error;
+
+      alert('Cambios guardados exitosamente');
+      setEditandoPerfil(false);
+    } catch (error) {
+      console.error('Error al guardar cambios:', error);
+      alert('No se pudieron guardar los cambios');
+    }
   };
 
   const confirmarCerrarSesion = () => {

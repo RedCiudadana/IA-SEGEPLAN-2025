@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Calendar, FileText, Edit, Trash2 } from 'lucide-react';
+import {
+  obtenerDocumentos,
+  eliminarDocumento,
+  buscarDocumentos,
+  type Documento
+} from '../../lib/documentos';
 
 interface HistorialProps {
   usuario: { nombre: string; cargo: string };
@@ -9,50 +15,36 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
   const [busqueda, setBusqueda] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState('');
+  const [documentos, setDocumentos] = useState<Documento[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  // Datos de ejemplo para el historial
-  const documentos = [
-    {
-      id: 1,
-      titulo: 'Oficio de Solicitud de Información',
-      tipo: 'oficio',
-      fecha: '2025-01-15',
-      destinatario: 'Lic. María González',
-      estado: 'completado'
-    },
-    {
-      id: 2,
-      titulo: 'Memorando sobre Presupuesto 2025',
-      tipo: 'memorando',
-      fecha: '2025-01-14',
-      destinatario: 'Departamento de Finanzas',
-      estado: 'borrador'
-    },
-    {
-      id: 3,
-      titulo: 'Carta de Invitación a Evento',
-      tipo: 'carta',
-      fecha: '2025-01-13',
-      destinatario: 'Ing. Roberto Pérez',
-      estado: 'completado'
-    },
-    {
-      id: 4,
-      titulo: 'Minuta de Reunión de Coordinación',
-      tipo: 'minuta',
-      fecha: '2025-01-12',
-      destinatario: 'Equipo de Proyecto',
-      estado: 'completado'
-    },
-    {
-      id: 5,
-      titulo: 'Resumen de Expediente 001-2025',
-      tipo: 'resumen',
-      fecha: '2025-01-11',
-      destinatario: 'Dirección General',
-      estado: 'completado'
+  useEffect(() => {
+    cargarDocumentos();
+  }, []);
+
+  const cargarDocumentos = async () => {
+    try {
+      setCargando(true);
+      const docs = await obtenerDocumentos();
+      setDocumentos(docs);
+    } catch (error) {
+      console.error('Error al cargar documentos:', error);
+    } finally {
+      setCargando(false);
     }
-  ];
+  };
+
+  const manejarEliminar = async (id: string) => {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este documento?')) {
+      try {
+        await eliminarDocumento(id);
+        await cargarDocumentos();
+      } catch (error) {
+        console.error('Error al eliminar documento:', error);
+        alert('No se pudo eliminar el documento');
+      }
+    }
+  };
 
   const tiposDocumento = [
     { valor: 'todos', etiqueta: 'Todos los tipos' },
@@ -65,24 +57,25 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
   ];
 
   const documentosFiltrados = documentos.filter(doc => {
-    const coincideBusqueda = doc.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                           doc.destinatario.toLowerCase().includes(busqueda.toLowerCase());
-    const coincideTipo = filtroTipo === 'todos' || doc.tipo === filtroTipo;
-    const coincideFecha = !filtroFecha || doc.fecha.includes(filtroFecha);
-    
+    const coincideBusqueda = busqueda === '' ||
+      doc.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (doc.destinatario && doc.destinatario.toLowerCase().includes(busqueda.toLowerCase()));
+    const coincideTipo = filtroTipo === 'todos' || doc.tipo_documento === filtroTipo;
+    const coincideFecha = !filtroFecha || doc.created_at.includes(filtroFecha);
+
     return coincideBusqueda && coincideTipo && coincideFecha;
   });
 
   const obtenerColorTipo = (tipo: string) => {
-    const colores = {
-      oficio: 'bg-blue-100 text-blue-800',
-      memorando: 'bg-green-100 text-green-800',
-      carta: 'bg-purple-100 text-purple-800',
-      minuta: 'bg-orange-100 text-orange-800',
-      resumen: 'bg-teal-100 text-teal-800',
-      analisis: 'bg-red-100 text-red-800'
+    const colores: Record<string, string> = {
+      'redactor-oficios': 'bg-blue-100 text-blue-800',
+      'generador-memos': 'bg-green-100 text-green-800',
+      'redactor-cartas': 'bg-purple-100 text-purple-800',
+      'asistente-minutas': 'bg-orange-100 text-orange-800',
+      'resumen-expedientes': 'bg-teal-100 text-teal-800',
+      'analisis-inversion': 'bg-red-100 text-red-800'
     };
-    return colores[tipo as keyof typeof colores] || 'bg-gray-100 text-gray-800';
+    return colores[tipo] || 'bg-gray-100 text-gray-800';
   };
 
   const obtenerColorEstado = (estado: string) => {
@@ -164,61 +157,66 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
         </div>
 
         <div className="divide-y divide-gray-200">
-          {documentosFiltrados.map(documento => (
-            <div key={documento.id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h4 className="text-lg font-medium text-gray-800">
-                      {documento.titulo}
-                    </h4>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${obtenerColorTipo(documento.tipo)}`}>
-                      {documento.tipo}
-                    </span>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${obtenerColorEstado(documento.estado)}`}>
-                      {documento.estado}
-                    </span>
-                  </div>
-                  
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>Destinatario:</strong> {documento.destinatario}</p>
-                    <p><strong>Fecha:</strong> {new Date(documento.fecha).toLocaleDateString('es-GT')}</p>
-                  </div>
-                </div>
+          {cargando ? (
+            <div className="p-12 text-center">
+              <p className="text-gray-600">Cargando documentos...</p>
+            </div>
+          ) : (
+            documentosFiltrados.map(documento => (
+              <div key={documento.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h4 className="text-lg font-medium text-gray-800">
+                        {documento.titulo}
+                      </h4>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${obtenerColorTipo(documento.tipo_documento)}`}>
+                        {documento.tipo_documento}
+                      </span>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${obtenerColorEstado(documento.estado)}`}>
+                        {documento.estado}
+                      </span>
+                    </div>
 
-                <div className="flex space-x-2 ml-4">
-                  <button
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Editar"
-                  >
-                    <Edit size={16} />
-                  </button>
-                  <button
-                    className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                    title="Ver documento"
-                  >
-                    <FileText size={16} />
-                  </button>
-                  <button
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      {documento.destinatario && (
+                        <p><strong>Destinatario:</strong> {documento.destinatario}</p>
+                      )}
+                      <p><strong>Fecha:</strong> {new Date(documento.created_at).toLocaleDateString('es-GT')}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2 ml-4">
+                    <button
+                      className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      title="Ver documento"
+                    >
+                      <FileText size={16} />
+                    </button>
+                    <button
+                      onClick={() => manejarEliminar(documento.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
-        {documentosFiltrados.length === 0 && (
+        {!cargando && documentosFiltrados.length === 0 && (
           <div className="p-12 text-center">
             <FileText className="mx-auto mb-4 text-gray-400" size={48} />
             <h3 className="text-lg font-medium text-gray-800 mb-2">
               No se encontraron documentos
             </h3>
             <p className="text-gray-600">
-              Intenta ajustar los filtros de búsqueda o genera un nuevo documento
+              {documentos.length === 0
+                ? 'Aún no has generado ningún documento. Comienza usando los agentes de IA.'
+                : 'Intenta ajustar los filtros de búsqueda'}
             </p>
           </div>
         )}
