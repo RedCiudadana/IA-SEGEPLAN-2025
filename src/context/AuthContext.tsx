@@ -93,31 +93,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            nombre: nombre,
+            cargo: cargo
+          }
+        }
       });
 
       if (error) throw error;
-
-      if (data.user) {
-        const { error: perfilError } = await supabase
-          .from('usuarios')
-          .insert({
-            id: data.user.id,
-            email: email,
-            nombre: nombre,
-            cargo: cargo,
-            fecha_ingreso: new Date().toISOString().split('T')[0]
-          });
-
-        if (perfilError) throw perfilError;
-
-        const { error: configError } = await supabase
-          .from('configuracion_usuario')
-          .insert({
-            usuario_id: data.user.id
-          });
-
-        if (configError) console.error('Error al crear configuración:', configError);
-      }
 
       return { error: null };
     } catch (error: any) {
