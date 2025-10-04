@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  Home, 
-  FileText, 
-  FileEdit, 
-  Mail, 
-  ClipboardList, 
-  BookOpen, 
-  FolderOpen, 
+import {
+  Home,
+  FileText,
+  FileEdit,
+  Mail,
+  ClipboardList,
+  BookOpen,
+  FolderOpen,
   History,
   BarChart3,
   ChevronDown,
   Menu,
   X,
-  User
+  User,
+  Book
 } from 'lucide-react';
 
 interface TopNavigationProps {
@@ -33,7 +34,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
     { id: 'tutoriales', titulo: 'Tutoriales', icono: BookOpen },
     { id: 'curso-ia', titulo: 'Curso de IA', icono: BookOpen },
     { id: 'historial', titulo: 'Historial', icono: History },
-    { id: 'estadisticas', titulo: 'Estadísticas', icono: BarChart3 }
+    { id: 'estadisticas', titulo: 'Estadísticas', icono: BarChart3 },
+    { id: 'documentacion', titulo: 'Documentación', icono: Book }
   ];
 
   const agentes = [

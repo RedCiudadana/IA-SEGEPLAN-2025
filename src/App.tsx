@@ -16,6 +16,7 @@ import CursoIA from './components/pages/CursoIA';
 import NotFound from './components/pages/NotFound';
 import Perfil from './components/pages/Perfil';
 import Estadisticas from './components/pages/Estadisticas';
+import Documentacion from './components/pages/Documentacion';
 import ScrollToTop from './components/layout/scrolltotop';
 
 function App() {
@@ -64,6 +65,8 @@ function App() {
         return <Perfil usuario={usuario} onCerrarSesion={manejarCerrarSesion} />;
       case 'estadisticas':
         return <Estadisticas usuario={usuario} />;
+      case 'documentacion':
+        return <Documentacion usuario={usuario} />;
       case '404':
         return <NotFound onGoHome={() => setSeccionActiva('inicio')} />;
       default:
