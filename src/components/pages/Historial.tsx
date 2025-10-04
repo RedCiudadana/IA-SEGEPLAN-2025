@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, FileText, CreditCard as Edit, Trash2 } from 'lucide-react';
+import { Search, Calendar, FileText, CreditCard as Edit, Trash2, BarChart2, Download } from 'lucide-react';
 import {
   obtenerDocumentos,
   eliminarDocumento,
   buscarDocumentos,
+  contarDocumentosPorTipo,
   type Documento
 } from '../../lib/documentos';
 
@@ -17,18 +18,43 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
   const [filtroFecha, setFiltroFecha] = useState('');
   const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [estadisticasDocumentos, setEstadisticasDocumentos] = useState<Record<string, number>>({});
 
   useEffect(() => {
     cargarDocumentos();
   }, []);
 
+  useEffect(() => {
+    if (busqueda.length >= 3) {
+      realizarBusqueda();
+    } else if (busqueda.length === 0) {
+      cargarDocumentos();
+    }
+  }, [busqueda]);
+
   const cargarDocumentos = async () => {
     try {
       setCargando(true);
-      const docs = await obtenerDocumentos();
+      const [docs, stats] = await Promise.all([
+        obtenerDocumentos(),
+        contarDocumentosPorTipo()
+      ]);
       setDocumentos(docs);
+      setEstadisticasDocumentos(stats);
     } catch (error) {
       console.error('Error al cargar documentos:', error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const realizarBusqueda = async () => {
+    try {
+      setCargando(true);
+      const docs = await buscarDocumentos(busqueda);
+      setDocumentos(docs);
+    } catch (error) {
+      console.error('Error al buscar documentos:', error);
     } finally {
       setCargando(false);
     }
@@ -84,6 +110,10 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
       : 'bg-yellow-100 text-yellow-800';
   };
 
+  const totalDocumentos = documentos.length;
+  const documentosCompletados = documentos.filter(d => d.estado === 'completado').length;
+  const documentosBorradores = documentos.filter(d => d.estado === 'borrador').length;
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -93,6 +123,57 @@ const Historial: React.FC<HistorialProps> = ({ usuario }) => {
         <p className="text-gray-600">
           Gestiona y consulta todos los documentos generados con el sistema
         </p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium mb-1">Total Documentos</p>
+              <p className="text-white text-3xl font-bold">{totalDocumentos}</p>
+            </div>
+            <div className="p-3 bg-white/20 rounded-xl">
+              <FileText size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm font-medium mb-1">Completados</p>
+              <p className="text-white text-3xl font-bold">{documentosCompletados}</p>
+            </div>
+            <div className="p-3 bg-white/20 rounded-xl">
+              <FileText size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-100 text-sm font-medium mb-1">Borradores</p>
+              <p className="text-white text-3xl font-bold">{documentosBorradores}</p>
+            </div>
+            <div className="p-3 bg-white/20 rounded-xl">
+              <Edit size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm font-medium mb-1">Por Tipo</p>
+              <p className="text-white text-3xl font-bold">{Object.keys(estadisticasDocumentos).length}</p>
+            </div>
+            <div className="p-3 bg-white/20 rounded-xl">
+              <BarChart2 size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filtros */}
