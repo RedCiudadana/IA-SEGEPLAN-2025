@@ -1,20 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Home,
-  FileText,
-  FileEdit,
-  Mail,
-  ClipboardList,
-  BookOpen,
-  FolderOpen,
-  History,
-  BarChart3,
-  ChevronDown,
-  Menu,
-  X,
-  User,
-  Book
-} from 'lucide-react';
+import { Home, FileText, File as FileEdit, Mail, ClipboardList, BookOpen, FolderOpen, History, BarChart3, ChevronDown, Menu, X, User, Book } from 'lucide-react';
 
 interface TopNavigationProps {
   seccionActiva: string;
