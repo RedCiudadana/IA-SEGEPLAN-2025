@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, FileText, Edit, Trash2 } from 'lucide-react';
+import { Search, Calendar, FileText, CreditCard as Edit, Trash2 } from 'lucide-react';
 import {
   obtenerDocumentos,
   eliminarDocumento,
