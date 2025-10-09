@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  FileText, 
-  FileEdit, 
-  Mail, 
-  ClipboardList, 
-  BookOpen, 
+import {
+  FileText,
+  FileEdit,
+  Mail,
+  ClipboardList,
+  BookOpen,
   FolderOpen,
   Zap,
   Users,
@@ -13,7 +13,13 @@ import {
   Sparkles,
   Clock,
   Shield,
-  Target
+  Target,
+  Send,
+  MessageSquare,
+  ScrollText,
+  FileCheck,
+  FolderSearch,
+  TrendingUp
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -27,17 +33,22 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
       id: 'redactor-oficios',
       titulo: 'Redactor de Oficios',
       descripcion: 'Genera oficios formales siguiendo protocolos institucionales de SEGEPLAN',
-      icono: FileText,
+      icono: Send,
       color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
       categoria: 'Comunicación Externa',
-      tiempo: '2-3 min'
+      tiempo: '2-3 min',
+      popular: true
     },
     {
       id: 'generador-memos',
       titulo: 'Generador de Memos',
       descripcion: 'Crea memorandos internos con formato estandarizado para comunicación interna',
-      icono: FileEdit,
+      icono: MessageSquare,
       color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
       categoria: 'Comunicación Interna',
       tiempo: '1-2 min'
     },
@@ -45,8 +56,10 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
       id: 'redactor-cartas',
       titulo: 'Redactor de Cartas',
       descripcion: 'Redacta cartas oficiales con protocolo diplomático y ceremonial apropiado',
-      icono: Mail,
+      icono: ScrollText,
       color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
       categoria: 'Protocolo Oficial',
       tiempo: '3-4 min'
     },
@@ -54,8 +67,10 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
       id: 'asistente-minutas',
       titulo: 'Asistente de Minutas',
       descripcion: 'Elabora minutas y actas de reuniones institucionales con formato estándar',
-      icono: ClipboardList,
+      icono: FileCheck,
       color: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
+      iconColor: 'text-orange-600',
       categoria: 'Gestión de Reuniones',
       tiempo: '4-5 min'
     },
@@ -63,17 +78,22 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
       id: 'resumen-expedientes',
       titulo: 'Resumen de Expedientes',
       descripcion: 'Genera resúmenes ejecutivos de expedientes complejos con análisis estructurado',
-      icono: BookOpen,
+      icono: FolderSearch,
       color: 'from-teal-500 to-teal-600',
+      bgColor: 'bg-teal-50',
+      iconColor: 'text-teal-600',
       categoria: 'Análisis Documental',
-      tiempo: '5-7 min'
+      tiempo: '5-7 min',
+      popular: true
     },
     {
       id: 'analisis-inversion',
       titulo: 'Análisis de Inversión',
       descripcion: 'Analiza y evalúa expedientes de proyectos de inversión pública bajo normativa SNIP',
-      icono: FolderOpen,
+      icono: TrendingUp,
       color: 'from-red-500 to-red-600',
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600',
       categoria: 'Inversión Pública',
       tiempo: '7-10 min'
     }
@@ -111,18 +131,21 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
       {/* Welcome Section - Redesigned */}
       <section className="relative">
         <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "40px 40px"}}></div>
+          </div>
           <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
           <div className="relative p-12">
             <div className="max-w-4xl">
-              <div className="flex items-center space-x-4 mb-8">
-                <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <Zap size={32} className="text-white" />
+              <div className="flex items-center space-x-6 mb-8">
+                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
+                  <Sparkles size={40} className="text-white" />
                 </div>
                 <div>
-                  <h1 className="text-5xl font-bold text-white mb-2">
+                  <h1 className="text-5xl font-bold text-white mb-3">
                     Bienvenido, {usuario.nombre}
                   </h1>
-                  <p className="text-blue-200 text-xl font-medium">
+                  <p className="text-blue-200 text-xl font-semibold">
                     {usuario.cargo} • SEGEPLAN
                   </p>
                 </div>
@@ -263,23 +286,36 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
             return (
               <div
                 key={agente.id}
-                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-gray-200 transform hover:-translate-y-1 overflow-hidden"
+                className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-gray-200 transform hover:-translate-y-2 overflow-hidden cursor-pointer relative"
               >
+                {agente.popular && (
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg flex items-center space-x-1">
+                      <Sparkles size={12} />
+                      <span>Popular</span>
+                    </div>
+                  </div>
+                )}
                 {/* Header with gradient */}
-                <div className={`h-3 bg-gradient-to-r ${agente.color}`}></div>
-                
+                <div className={`h-2 bg-gradient-to-r ${agente.color}`}></div>
+
                 <div className="p-8">
                   {/* Icon and Category */}
                   <div className="flex items-start justify-between mb-6">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${agente.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <IconoComponente size={28} className="text-white" />
+                    <div className="relative">
+                      <div className={`w-20 h-20 ${agente.bgColor} rounded-3xl flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                        <IconoComponente size={36} className={agente.iconColor} strokeWidth={2} />
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                        <Sparkles size={16} className="text-white" />
+                      </div>
                     </div>
                     <div className="text-right">
-                      <span className="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1 rounded-full mb-1">
+                      <span className="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-2">
                         {agente.categoria}
                       </span>
-                      <div className="flex items-center text-gray-500 text-sm">
-                        <Clock size={14} className="mr-1" />
+                      <div className="flex items-center justify-end text-gray-500 text-sm font-medium">
+                        <Clock size={14} className="mr-1.5" />
                         {agente.tiempo}
                       </div>
                     </div>
@@ -297,10 +333,11 @@ const Dashboard: React.FC<DashboardProps> = ({ usuario, onSeleccionarAgente }) =
                   {/* Action Button */}
                   <button
                     onClick={() => onSeleccionarAgente(agente.id)}
-                    className={`w-full bg-gradient-to-r ${agente.color} hover:shadow-xl text-white px-6 py-4 rounded-2xl transition-all duration-300 font-semibold text-lg shadow-lg transform group-hover:scale-105 flex items-center justify-center space-x-2`}
+                    className={`w-full bg-gradient-to-r ${agente.color} hover:shadow-2xl text-white px-6 py-4 rounded-2xl transition-all duration-300 font-bold text-lg shadow-xl transform group-hover:scale-105 flex items-center justify-center space-x-3 relative overflow-hidden group/button`}
                   >
-                    <span>Comenzar</span>
-                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/button:translate-y-0 transition-transform duration-300"></div>
+                    <span className="relative">Comenzar Ahora</span>
+                    <ArrowRight size={22} className="relative group-hover:translate-x-2 transition-transform duration-300" strokeWidth={3} />
                   </button>
                 </div>
               </div>
