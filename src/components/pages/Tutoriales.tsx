@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Play, 
-  FileText, 
-  FileEdit, 
-  Mail, 
-  ClipboardList, 
-  BookOpen, 
+import {
+  Play,
+  FileText,
+  FileEdit,
+  Mail,
+  ClipboardList,
+  BookOpen,
   FolderOpen,
   ChevronRight,
   Clock,
@@ -13,7 +13,17 @@ import {
   CheckCircle,
   Lightbulb,
   Video,
-  Download
+  Download,
+  Send,
+  MessageSquare,
+  ScrollText,
+  FileCheck,
+  FolderSearch,
+  TrendingUp,
+  Sparkles,
+  GraduationCap,
+  Target,
+  Zap
 } from 'lucide-react';
 
 interface TutorialesProps {
@@ -28,8 +38,10 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       id: 'redactor-oficios',
       titulo: 'Redactor de Oficios',
       descripcion: 'Aprende a generar oficios formales institucionales',
-      icono: FileText,
+      icono: Send,
       color: 'from-blue-500 to-blue-600',
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
       duracion: '5 min',
       nivel: 'Básico',
       pasos: [
@@ -64,8 +76,10 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       id: 'generador-memos',
       titulo: 'Generador de Memos',
       descripcion: 'Crea memorandos internos eficientemente',
-      icono: FileEdit,
+      icono: MessageSquare,
       color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
       duracion: '4 min',
       nivel: 'Básico',
       pasos: [
@@ -95,8 +109,10 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       id: 'redactor-cartas',
       titulo: 'Redactor de Cartas',
       descripcion: 'Redacta cartas oficiales con protocolo apropiado',
-      icono: Mail,
+      icono: ScrollText,
       color: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
       duracion: '6 min',
       nivel: 'Intermedio',
       pasos: [
@@ -126,8 +142,10 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       id: 'asistente-minutas',
       titulo: 'Asistente de Minutas',
       descripcion: 'Elabora minutas y actas de reuniones',
-      icono: ClipboardList,
+      icono: FileCheck,
       color: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
+      iconColor: 'text-orange-600',
       duracion: '7 min',
       nivel: 'Intermedio',
       pasos: [
@@ -156,9 +174,11 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
     {
       id: 'resumen-expedientes',
       titulo: 'Resumen de Expedientes',
-      descripción: 'Genera resúmenes ejecutivos de expedientes',
-      icono: BookOpen,
+      descripcion: 'Genera resúmenes ejecutivos de expedientes',
+      icono: FolderSearch,
       color: 'from-teal-500 to-teal-600',
+      bgColor: 'bg-teal-50',
+      iconColor: 'text-teal-600',
       duracion: '8 min',
       nivel: 'Avanzado',
       pasos: [
@@ -183,8 +203,10 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       id: 'analisis-inversion',
       titulo: 'Análisis de Inversión',
       descripcion: 'Evalúa proyectos de inversión pública',
-      icono: FolderOpen,
+      icono: TrendingUp,
       color: 'from-red-500 to-red-600',
+      bgColor: 'bg-red-50',
+      iconColor: 'text-red-600',
       duracion: '10 min',
       nivel: 'Avanzado',
       pasos: [
@@ -211,22 +233,26 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
     {
       titulo: 'Información Completa',
       descripcion: 'Proporciona toda la información requerida para obtener mejores resultados',
-      icono: CheckCircle
+      icono: CheckCircle,
+      color: 'from-emerald-500 to-teal-500'
     },
     {
       titulo: 'Contenido Específico',
       descripcion: 'Usa el campo de contenido adicional para instrucciones detalladas',
-      icono: Lightbulb
+      icono: Target,
+      color: 'from-blue-500 to-cyan-500'
     },
     {
       titulo: 'Revisión Final',
       descripcion: 'Siempre revisa y edita el documento generado antes de usarlo',
-      icono: FileText
+      icono: FileCheck,
+      color: 'from-purple-500 to-pink-500'
     },
     {
       titulo: 'Guarda tu Trabajo',
       descripcion: 'Utiliza el historial para gestionar tus documentos generados',
-      icono: BookOpen
+      icono: BookOpen,
+      color: 'from-orange-500 to-red-500'
     }
   ];
 
@@ -244,17 +270,45 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Tutoriales del Sistema
-          </h2>
-          <p className="text-gray-600 text-lg max-w-3xl mx-auto">
-            Aprende a usar cada agente de IA para generar documentos oficiales de manera eficiente. 
-            Sigue nuestras guías paso a paso para dominar todas las funcionalidades.
-          </p>
+    <div className="space-y-10">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="relative p-12">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "40px 40px"}}></div>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
+
+          <div className="relative text-center">
+            <div className="flex items-center justify-center space-x-4 mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-2xl">
+                <GraduationCap size={32} className="text-white" />
+              </div>
+              <h2 className="text-5xl font-bold text-white">
+                Tutoriales del Sistema
+              </h2>
+            </div>
+
+            <p className="text-white/90 text-xl max-w-3xl mx-auto leading-relaxed mb-8">
+              Aprende a usar cada agente de IA para generar documentos oficiales de manera eficiente.
+              Sigue nuestras guías paso a paso para dominar todas las funcionalidades.
+            </p>
+
+            <div className="flex items-center justify-center space-x-8 text-white/80">
+              <div className="flex items-center space-x-2">
+                <Sparkles size={20} className="text-yellow-400" />
+                <span className="font-semibold">6 Agentes Especializados</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Zap size={20} className="text-blue-400" />
+                <span className="font-semibold">Guías Paso a Paso</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle size={20} className="text-emerald-400" />
+                <span className="font-semibold">Fácil de Seguir</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -267,44 +321,51 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
           return (
             <div
               key={tutorial.id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden"
+              className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-gray-200 overflow-hidden transform hover:-translate-y-2 group"
             >
               <div className={`h-2 bg-gradient-to-r ${tutorial.color}`}></div>
-              
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-14 h-14 bg-gradient-to-br ${tutorial.color} rounded-xl flex items-center justify-center shadow-lg`}>
-                    <IconoComponente size={24} className="text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <Clock size={14} className="text-gray-500" />
-                      <span className="text-sm text-gray-500">{tutorial.duracion}</span>
+
+              <div className="p-8">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="relative">
+                    <div className={`w-20 h-20 ${tutorial.bgColor} rounded-3xl flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-110`}>
+                      <IconoComponente size={36} className={tutorial.iconColor} strokeWidth={2} />
                     </div>
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${obtenerColorNivel(tutorial.nivel)}`}>
+                    <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                      <Play size={16} className="text-white ml-0.5" />
+                    </div>
+                  </div>
+                  <div className="text-right space-y-2">
+                    <div className="flex items-center justify-end space-x-2">
+                      <Clock size={16} className="text-gray-500" />
+                      <span className="text-sm font-semibold text-gray-700">{tutorial.duracion}</span>
+                    </div>
+                    <span className={`inline-block px-3 py-1.5 text-xs font-bold rounded-full ${obtenerColorNivel(tutorial.nivel)}`}>
                       {tutorial.nivel}
                     </span>
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-800 mb-3">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   {tutorial.titulo}
                 </h3>
-                
-                <p className="text-gray-600 mb-6 leading-relaxed">
+
+                <p className="text-gray-600 mb-8 leading-relaxed text-base">
                   {tutorial.descripcion}
                 </p>
 
                 <button
                   onClick={() => setTutorialActivo(esActivo ? null : tutorial.id)}
-                  className={`w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-xl transition-all duration-200 font-semibold ${
+                  className={`w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-2xl transition-all duration-300 font-bold text-lg shadow-xl transform group-hover:scale-105 relative overflow-hidden ${
                     esActivo
-                      ? 'bg-gray-100 text-gray-700'
-                      : `bg-gradient-to-r ${tutorial.color} text-white hover:shadow-lg transform hover:scale-105`
+                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      : `bg-gradient-to-r ${tutorial.color} text-white hover:shadow-2xl`
                   }`}
                 >
-                  <Play size={16} />
-                  <span>{esActivo ? 'Ocultar Tutorial' : 'Ver Tutorial'}</span>
+                  {!esActivo && <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>}
+                  <Play size={20} className="relative" strokeWidth={3} />
+                  <span className="relative">{esActivo ? 'Ocultar Tutorial' : 'Ver Tutorial'}</span>
+                  <ChevronRight size={20} className={`relative transition-transform duration-300 ${esActivo ? 'rotate-90' : ''}`} strokeWidth={3} />
                 </button>
 
                 {/* Tutorial Steps */}
@@ -337,21 +398,29 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       </div>
 
       {/* Tips Section */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Consejos para Mejores Resultados
-        </h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-3xl shadow-xl p-12 border-2 border-gray-100">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center space-x-3 mb-4">
+            <Lightbulb size={32} className="text-yellow-500" />
+            <h3 className="text-3xl font-bold text-gray-900">
+              Consejos para Mejores Resultados
+            </h3>
+          </div>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Sigue estas recomendaciones para aprovechar al máximo los agentes de IA
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {consejos.map((consejo, index) => {
             const IconoComponente = consejo.icono;
-            
+
             return (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <IconoComponente size={24} className="text-blue-600" />
+              <div key={index} className="group text-center bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-gray-200">
+                <div className={`w-20 h-20 bg-gradient-to-br ${consejo.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <IconoComponente size={32} className="text-white" strokeWidth={2.5} />
                 </div>
-                <h4 className="font-bold text-gray-800 mb-2">
+                <h4 className="font-bold text-gray-900 mb-3 text-lg">
                   {consejo.titulo}
                 </h4>
                 <p className="text-gray-600 text-sm leading-relaxed">
@@ -364,55 +433,69 @@ const Tutoriales: React.FC<TutorialesProps> = ({ usuario }) => {
       </div>
 
       {/* Video Resources */}
-      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-200">
-        <div className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Video size={32} className="text-white" />
+      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-blue-700 rounded-3xl shadow-2xl overflow-hidden">
+        <div className="relative p-12">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{backgroundImage: "radial-gradient(circle, white 2px, transparent 2px)", backgroundSize: "30px 30px"}}></div>
           </div>
-          
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            Recursos Adicionales
-          </h3>
-          
-          <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-            Próximamente estarán disponibles videos tutoriales y guías descargables 
-            para complementar tu aprendizaje del sistema AIGP-SEGEPLAN.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold">
-              <Video size={16} />
-              <span>Videos Tutoriales</span>
-            </button>
-            
-            <button className="flex items-center space-x-2 px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-semibold">
-              <Download size={16} />
-              <span>Guías PDF</span>
-            </button>
+
+          <div className="relative text-center">
+            <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+              <Video size={48} className="text-white" strokeWidth={2} />
+            </div>
+
+            <h3 className="text-3xl font-bold text-white mb-4">
+              Recursos Adicionales
+            </h3>
+
+            <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Próximamente estarán disponibles videos tutoriales y guías descargables
+              para complementar tu aprendizaje del sistema AIGP-SEGEPLAN.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button className="flex items-center space-x-3 px-8 py-4 bg-white text-blue-600 rounded-2xl hover:bg-blue-50 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105">
+                <Video size={20} strokeWidth={2.5} />
+                <span>Videos Tutoriales</span>
+              </button>
+
+              <button className="flex items-center space-x-3 px-8 py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white/50 rounded-2xl hover:bg-white/20 transition-all duration-300 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105">
+                <Download size={20} strokeWidth={2.5} />
+                <span>Guías PDF</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Support Contact */}
-      <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            ¿Necesitas Ayuda Adicional?
-          </h3>
-          
-          <p className="text-gray-600 mb-6">
-            Si tienes dudas específicas sobre el uso de algún agente, no dudes en contactar 
+      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl shadow-xl p-12 border-2 border-emerald-100">
+        <div className="text-center max-w-3xl mx-auto">
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Users size={32} className="text-white" strokeWidth={2} />
+            </div>
+            <h3 className="text-3xl font-bold text-gray-900">
+              ¿Necesitas Ayuda Adicional?
+            </h3>
+          </div>
+
+          <p className="text-gray-700 text-lg mb-8 leading-relaxed">
+            Si tienes dudas específicas sobre el uso de algún agente, no dudes en contactar
             al equipo de soporte técnico de SEGEPLAN.
           </p>
-          
-          <div className="flex items-center justify-center space-x-8 text-gray-600">
-            <div className="flex items-center space-x-2">
-              <Mail size={16} />
-              <span>soporte@segeplan.gob.gt</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200">
+              <Mail size={24} className="text-emerald-600 mx-auto mb-3" strokeWidth={2} />
+              <p className="text-sm font-semibold text-gray-500 mb-2">Correo Electrónico</p>
+              <p className="text-gray-900 font-bold">soporte@segeplan.gob.gt</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <Users size={16} />
-              <span>Mesa de Ayuda: Ext. 1234</span>
+
+            <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-emerald-200">
+              <Users size={24} className="text-emerald-600 mx-auto mb-3" strokeWidth={2} />
+              <p className="text-sm font-semibold text-gray-500 mb-2">Mesa de Ayuda</p>
+              <p className="text-gray-900 font-bold">Extensión 1234</p>
             </div>
           </div>
         </div>
