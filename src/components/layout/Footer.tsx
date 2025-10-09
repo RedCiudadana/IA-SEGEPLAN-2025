@@ -100,6 +100,22 @@ const Footer: React.FC = () => {
               >
                 Desafíos
               </a>
+              <a
+                href="https://redciudadana.org/curso-ia"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-gray-300 hover:text-white transition-colors text-sm"
+              >
+                Curso de IA
+              </a>
+              <a
+                href="https://docs.aigp-segeplan.gt"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-gray-300 hover:text-white transition-colors text-sm"
+              >
+                Documentación
+              </a>
             </nav>
 
             <div className="pt-4 border-t border-white/10">

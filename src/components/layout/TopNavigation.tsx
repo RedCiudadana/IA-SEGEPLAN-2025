@@ -17,10 +17,8 @@ const TopNavigation: React.FC<TopNavigationProps> = ({
     { id: 'inicio', titulo: 'Inicio', icono: Home },
     { id: 'perfil', titulo: 'Mi Perfil', icono: User },
     { id: 'tutoriales', titulo: 'Tutoriales', icono: BookOpen },
-    { id: 'curso-ia', titulo: 'Curso de IA', icono: BookOpen },
     { id: 'historial', titulo: 'Historial', icono: History },
-    { id: 'estadisticas', titulo: 'Estadísticas', icono: BarChart3 },
-    { id: 'documentacion', titulo: 'Documentación', icono: Book }
+    { id: 'estadisticas', titulo: 'Estadísticas', icono: BarChart3 }
   ];
 
   const agentes = [
