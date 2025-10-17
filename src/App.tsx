@@ -87,7 +87,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
       <ScrollToTop seccionActiva={seccionActiva} />
-      <Header usuario={usuario} />
+      <Header usuario={usuario} onCerrarSesion={manejarCerrarSesion} />
       <TopNavigation
         seccionActiva={seccionActiva}
         onCambiarSeccion={setSeccionActiva}

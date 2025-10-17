@@ -6,9 +6,10 @@ import LogoRedCiudadana from '../../assets/redciudadana-logo.png';
 
 interface HeaderProps {
   usuario: { nombre: string; cargo: string };
+  onCerrarSesion: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ usuario }) => {
+const Header: React.FC<HeaderProps> = ({ usuario, onCerrarSesion }) => {
   const [mostrarAyuda, setMostrarAyuda] = useState(false);
   const [menuUsuarioAbierto, setMenuUsuarioAbierto] = useState(false);
 
@@ -153,13 +154,11 @@ const Header: React.FC<HeaderProps> = ({ usuario }) => {
                         <span>Configuración</span>
                       </button>
                       <div className="border-t border-gray-200 mt-2 pt-2">
-                        <button 
+                        <button
                           onClick={() => {
                             setMenuUsuarioAbierto(false);
                             if (window.confirm('¿Estás seguro de que deseas cerrar sesión?')) {
-                              // Handle logout - this would typically call a logout function passed as prop
-                              alert('Sesión cerrada exitosamente');
-                              // In a real app, this would redirect to login or call onLogout prop
+                              onCerrarSesion();
                             }
                           }}
                           className="w-full flex items-center space-x-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors"
