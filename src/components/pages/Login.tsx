@@ -135,31 +135,6 @@ const Login: React.FC = () => {
             </p>
           </div>
 
-          {modo === 'login' && (
-            <div className="bg-blue-500/20 border border-blue-400/30 rounded-2xl p-4 mb-6">
-              <div className="flex items-start space-x-3">
-                <Info size={20} className="text-blue-300 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h3 className="text-blue-200 font-semibold mb-2">Cuenta de Prueba:</h3>
-                  <div className="space-y-1 text-sm">
-                    <p className="text-blue-100">
-                      <strong>Email:</strong> demo@segeplan.gob.gt
-                    </p>
-                    <p className="text-blue-100">
-                      <strong>Contraseña:</strong> demo123456
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={llenarCredencialesPrueba}
-                    className="mt-3 text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg transition-colors"
-                  >
-                    Llenar automáticamente
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           <form onSubmit={modo === 'login' ? manejarLogin : manejarRegistro} className="space-y-6">
             {modo === 'registro' && (
