@@ -53,7 +53,7 @@ const RedactorOficios: React.FC<RedactorOficiosProps> = ({ usuario }) => {
       \n\nDestinatario: ${datos.destinatario}\nCargo del destinatario: ${datos.cargo_destinatario}
       \nInstitución: ${datos.institucion}\nAsunto: ${datos.asunto}\nTipo de lenguaje: ${datos.tipo_lenguaje}
       \nNivel de urgencia: ${datos.urgencia}\n\nEl documento debe estar firmado por: ${usuario.nombre}, ${usuario.cargo}, 
-      SEGEPLAN. Usa un formato profesional y adecuado para un oficio oficial.`;
+      SEGEPLAN. Usa un formato ${datos.tipo_lenguaje} y adecuado para un oficio oficial.`;
 
       const agent = new Agent({
         name: "RedactorOficiosIA",
